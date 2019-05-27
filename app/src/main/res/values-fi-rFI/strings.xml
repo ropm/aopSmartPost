@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">aopSmartPostApp</string>
+    <string name="searchInput">Postinumero</string>
+    <string name="helloW">Hei maailma</string>
+    <string name="btnSearch">Etsi</string>
+    <string name="btnLocate">Paikanna minut</string>
+    <string name="valitseString">Kuinka monta SmartPostia?</string>
+    <string name="errorStringZip">Virhe, tarkista postinumero!</string>
+    <string name="errorStringGeneral">Virhe, jokin meni pieleen!</string>
+</resources>

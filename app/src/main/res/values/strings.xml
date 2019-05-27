@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">aopSmartPostApp</string>
+    <string name="helloW">Hello world!</string>
+    <string name="searchInput">Zip-code</string>
+    <string name="btnSearch">Search</string>
+    <string name="btnLocate">Locate me</string>
+    <string name="valitseString">How many SmartPosts?</string>
+    <string name="errorStringZip">Error, check zip-code!</string>
+    <string name="errorStringGeneral">Error, something went wrong!</string>
+</resources>
