@@ -7,4 +7,10 @@
     <string name="valitseString">How many SmartPosts?</string>
     <string name="errorStringZip">Error, check zip-code!</string>
     <string name="errorStringGeneral">Error, something went wrong!</string>
+    <string name="showGmap">Show on Google Maps</string>
+    <string name="locationPermissionString">Location required</string>
+    <string name="locationPermissionMessageString">Application needs permission to locate the device</string>
+    <string name="yesString">OK</string>
+    <string name="noString">Cancel</string>
+    <string name="locationNotFoundString">Could not find your location! Check your settings</string>
 </resources>
