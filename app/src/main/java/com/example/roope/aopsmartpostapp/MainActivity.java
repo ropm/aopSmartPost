@@ -23,6 +23,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -33,12 +34,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class MainActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     EditText txtEdit;
     Button btnSearch, btnLocate, btnShowOnMap;
     TextView txtResOne, txtSeekBar;
     SeekBar seekBar;
     String stringErrorZip, stringErrorGeneral, stringLocationPermissionTitle, stringLocationPermissionMessage, stringNotFound, yes, no;
+    String stringLocationPermissionOK, stringLocationPermissionNO;
 
     private FusedLocationProviderClient mFusedLocationClient;
 
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private double userLat;
     private double lon;
     private double lat;
-    private List lonLatList;
+    private List<Location> lonLatList = new ArrayList<>();
 
     private int top;
     private JsonApi jsonApi;
@@ -66,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         stringErrorGeneral = getResources().getString(R.string.errorStringGeneral);
         stringLocationPermissionTitle = getResources().getString(R.string.locationPermissionString);
         stringLocationPermissionMessage = getResources().getString(R.string.locationPermissionMessageString);
+        stringLocationPermissionOK = getResources().getString(R.string.locationPermissionOKString);
+        stringLocationPermissionNO = getResources().getString(R.string.locationPermissionNOString);
         stringNotFound = getResources().getString(R.string.locationNotFoundString);
         yes = getResources().getString(R.string.yesString);
         no = getResources().getString(R.string.noString);
@@ -79,15 +83,13 @@ public class MainActivity extends AppCompatActivity {
         //brings life to the methods without the body in the interface
         jsonApi = retrofit.create(JsonApi.class);
 
-
-
         getLocation();
 
-        //TODO: tulosta arvo txtView, get value siitä?
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 top = progress;
+                txtSeekBar.setText(String.valueOf(progress));
             }
 
             @Override
@@ -124,11 +126,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 txtResOne.setText("");
-
-
-                //TODO: get the lon lat from location of device
                 getByXY(userLon, userLat, top);
-
             }
         });
         //nappi avaa google mapsin sijaintiin
@@ -136,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openMapByXY(lon, lat);
-
             }
         });
     }
@@ -147,9 +144,8 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-
+                    Toast.makeText(MainActivity.this, stringLocationPermissionNO, Toast.LENGTH_LONG).show();
             // Permission is not granted
-            // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
                 // Show an explanation to the user *asynchronously* -- don't block
@@ -163,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions(MainActivity.this,
                                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+                                        MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                             }
                         })
                         .setNegativeButton(no, new DialogInterface.OnClickListener() {
@@ -179,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+                        MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                 // app-defined int constant. The callback method gets the
@@ -197,8 +193,8 @@ public class MainActivity extends AppCompatActivity {
                                 userLat = location.getLatitude();
                                 userLon = location.getLongitude();
                             }else{
-                                userLat = 62.501090;
-                                userLon = 29.363530;
+                                userLat = 0;
+                                userLon = 0;
                                 Toast.makeText(MainActivity.this, stringNotFound, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -210,12 +206,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION){
+        if(requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION){
             //if permission granted...
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-
+                Toast.makeText(MainActivity.this, stringLocationPermissionOK, Toast.LENGTH_SHORT).show();
             }else{
-
+                Toast.makeText(MainActivity.this, stringLocationPermissionNO, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -227,29 +223,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Posti>> call, Response<List<Posti>> response) {
                 //can be 404 also, will be null if not successful
-
-                if(!response.isSuccessful()){
+                if (!response.isSuccessful()) {
                     System.out.println("Error happened in the query: " + response.code());
                     txtResOne.setText(response.code());
                     return;
                 }
-                lonLatList.clear();
+
+                if (lonLatList != null && lonLatList.size() > 0) {
+                    lonLatList.clear();
+                }
+
                 List<Posti> postis = response.body();
-                for (Posti posti : postis){
-                    String result = "";
-                    result += posti.getPublicName() + ", " + posti.getAddress() + ", " + posti.getZip() + "\n";
-
-                    txtResOne.append(result);
-
-                    lon = posti.getMapLong();
-                    lat = posti.getMapLati();
-                    Location loc = new Location("");
-                    loc.setLatitude(lat);
-                    loc.setLongitude(lon);
-                    lonLatList.add(loc);
+                if (postis == null) {
+                    txtResOne.setText(stringErrorGeneral);
+                }else{
+                    for (Posti posti : postis) {
+                        String result = "";
+                        result += posti.getPublicName() + ", " + posti.getAddress() + ", " + posti.getZip() + "\n";
+                        txtResOne.append("- " + result);
+                        lon = posti.getMapLong();
+                        lat = posti.getMapLati();
+                        Location loc = new Location("");
+                        loc.setLatitude(lat);
+                        loc.setLongitude(lon);
+                        lonLatList.add(loc);
+                    }
                 }
             }
-
             @Override
             public void onFailure(Call<List<Posti>> call, Throwable t) {
                 System.out.println("Error happened: " + t.getMessage());
@@ -274,18 +274,16 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                lonLatList.clear();
                 List<Posti> postis = response.body();
-                for (Posti posti : postis){
-                    lon = posti.getMapLong();
-                    lat = posti.getMapLati();
-                    Location loc = new Location("");
-                    loc.setLatitude(lat);
-                    loc.setLongitude(lon);
-                    lonLatList.add(loc);
-
+                if (postis == null) {
+                    txtResOne.setText(stringErrorGeneral);
+                }else {
+                    for (Posti posti : postis) {
+                        lon = posti.getMapLong();
+                        lat = posti.getMapLati();
+                    }
+                    getByXY(lon, lat, top);
                 }
-                getByXY(lon, lat, top);
             }
 
             @Override
@@ -305,17 +303,27 @@ public class MainActivity extends AppCompatActivity {
             return parsedZip;
         }else {
             parsedZip = "error";
-            //TODO: error handling
             return parsedZip;
         }
     }
 
     public void openMapByXY(final double longitude, final double latitude) {
-        //TODO: make arrows by smartposts
         try {
-            Uri gmmIntentUri = Uri.parse("geo:" + longitude + "," + latitude);
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            mapIntent.setPackage("com.google.android.apps.maps");
+            StringBuilder sb = new StringBuilder();
+            //String mapQuery = "geo:0,0?z=12&q=";
+            String mapQuery = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude + "&waypoints=";
+            sb.append(mapQuery);
+            for (Location loc : lonLatList){
+                String query = loc.getLatitude() + "," + loc.getLongitude();
+                sb.append(query);
+                sb.append("|");
+            }
+            sb.deleteCharAt(sb.length()-1);
+            String fullQuery = sb.toString();
+            String uri = fullQuery + "&travelmode=driving";
+            Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri));
+            mapIntent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+            startActivity(mapIntent);
             if (mapIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(mapIntent);
             }
