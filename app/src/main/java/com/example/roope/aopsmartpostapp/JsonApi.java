@@ -4,9 +4,15 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+/**
+ * Retrofit kirjaston vaatima interface. Ei tarvitse antaa metodille sisältöä interfacen sisällä, pelkkä alustaminen riittää.
+ * Retrofit luo metodin sisällön automaattisesti, kun kysely tehdään.
+ * <code>GET(pickuppoints)</code> - hakee postit postinumeron perusteella
+ * <code>GET(pickuppoints?type=smartpost)</code> - hakee postit karttatietojen perusteella,
+ * params: longitude(double), latitude(double), top(int)
+ */
 public interface JsonApi {
 
     //get list of postis, json. no need to give method a body in interface, only declare, retrofit autogenerates method body.

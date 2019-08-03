@@ -35,7 +35,26 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * SmartPostApp, AoP-kurssin projektityö
+ * <p>
+ * Tarkemmat tiedot löytyvät ohjelman dokumentaatiosta, tämä JavaDoc käsittelee vain ohjelman toimintoja.
+ * Ohjelma käyttää Retrofit2, Google Maps ja Location kirjastoja, sillä ne helpottavat datan hakemisessa ja näyttämisessä.
+ * @see <a href="https://square.github.io/retrofit/">Retrofit2</a>
+ * @see <a href="https://developers.google.com/maps/documentation/urls/android-intents">Google Maps & Location</a>
+ * </p>
+ * @author Roope Marttinen
+ * @version 1.0, 01/08/2019
+ */
 
+/**
+ * <code>MainActivity</code>, pääohjelma
+ * <code>MainActivity</code> sisältää, kuten monet muutkin android sovellukset, ohjelman tärkeimmät luomisfunktiot sekä jaetut muuttujat,
+ * kuten esimerkiksi eri käyttöliittymäkomponentit.
+ *
+ * @author Roope Marttinen
+ * @version 1.0
+ */
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     EditText txtEdit;
@@ -56,6 +75,12 @@ public class MainActivity extends AppCompatActivity {
     private int top;
     private JsonApi jsonApi;
 
+    /**
+     * <code>onCreate</code> funktio vastaa käyttöliittymän luonnista. Funktiossa asetetaan muuttujille niiden omat komponentit käyttäen
+     * <code>findViewById(int id)</code> funktiota apuna.
+     *
+     * @param savedInstanceState - Bundle, ohjelman instanssi
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +119,13 @@ public class MainActivity extends AppCompatActivity {
         getLocation();
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            /**
+             * Asetetaan ChangeListener kyseiselle Seekbarille ja käsitellään tilanteen muutokset.
+             *
+             * @param seekBar - SeekBar, seekbar komponentti
+             * @param progress - int, seekbarin senhetkinen arvo
+             * @param fromUser - boolean, arvo käyttäjältä vai ei
+             */
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 top = progress;
@@ -111,9 +143,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        //nappi hakee syötteen perusteella
         btnSearch.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Asetetaan ClickListener kyseiselle painikkeelle ja käsitellään klikkaukset, kutsutaan <code>CheckInput</code> funktiota, sekä käsitellään sen palauttama arvo,
+             * jonka jälkeen kutsutaan <code>getByZip</code> funktiota kyseisellä palautetulla arvolla.
+             *
+             * @param v - View
+             */
             public void onClick(View v) {
                 txtResOne.setText("");
                 String searchTerm = txtEdit.getText().toString();
@@ -127,16 +163,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        //nappi hakee sijainnin perusteella
+
         btnLocate.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Asetetaan ClickListener kyseiselle painikkeelle ja käsitellään klikkaukset, asetetaan tekstikenttä <code>txtResOne</code> tyhjäksi,
+             * jonka jälkeen kutsutaan <code>getByXY</code> funktiota, <code>getLocation</code> funktion asettamilla arvoilla.
+             *
+             * @param v - View
+             */
             @Override
             public void onClick(View v) {
                 txtResOne.setText("");
                 getByXY(userLon, userLat, top);
             }
         });
-        //nappi avaa google mapsin sijaintiin
+
         btnShowOnMap.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Asetetaan ClickListener kyseiselle painikkeelle ja käsitellään klikkaukset, kutsutaan <code>openMapByXY</code> funktiota, <code>getByXY</code> funktion asettamilla arvoilla.
+             *
+             * @param v - View
+             */
             @Override
             public void onClick(View v) {
                 openMapByXY(lon, lat);
@@ -144,12 +191,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Luodaan Toolbaarille valikko.
+     *
+     * @param menu - Menu, menu eli valikko
+     * @return true - boolean, tosi
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
+    /**
+     * Käsitellään Toolbaarin valikon painikkeiden klikkaukset, if haarassa <code>emptyMenu</code> käsittelee käyttöliittymän tyhjennykset ja
+     * else haarassa käsitellään ohjelman lopetus.
+     *
+     * @param item - MenuItem, valikon painike
+     * @return true - boolean, tosi
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.emptyMenu) {
@@ -166,19 +226,19 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Tarkistetaan ja kysytään käyttäjältä luvat sijainnin käyttöön. Jos luvat kunnossa, niin haetaan sijainti ja asetetaan se
+     * <code>userLon, userLat/code> muuttujiin
+     */
     private void getLocation(){
-
-        // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, stringLocationPermissionNO, Toast.LENGTH_LONG).show();
-            // Permission is not granted
+            // Ei lupaa
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
+                // Näytä viesti threadissa ja kuuntele käyttäjän vastausta
                 new AlertDialog.Builder(this)
                         .setTitle(stringLocationPermissionTitle)
                         .setMessage(stringLocationPermissionMessage)
@@ -200,26 +260,22 @@ public class MainActivity extends AppCompatActivity {
                         .show();
 
             } else {
-                // No explanation needed; request the permission
+                // Pyydä lupaa
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
         } else {
-            // Permission has already been granted, access location
+            // Lupa on annettu, hae sijainti
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
+                            // Haettu viimeisin tunnettu sijainti
                             if (location != null) {
-                                // Logic to handle location object
                                 userLat = location.getLatitude();
                                 userLon = location.getLongitude();
+                            // Jos vastaus on null, niin asetetaan arvot nolliksi
                             }else{
                                 userLat = 0;
                                 userLon = 0;
@@ -230,8 +286,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
+    /**
+     * Kuunnellaan käyttäjän päätöstä sijannin käyttämispyyntöön liittyen. Näytetään viesti käyttäjän vastauksesta riippuen.
+     *
+     * @param requestCode - int, pyynnön koodi
+     * @param permissions - String list, luvat listana
+     * @param grantResults - int list, lupien annon tulokset
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION){
@@ -244,9 +305,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Haetaan smartpostit sijaintitietojen perusteella ja näytetään kaikki postit.
+     * Funktion sisällä oleva <code>onResponse</code> funktio hoitaa Retrofitin palauttaman kutsun käsittelyn, jos kutsu palautuu virheelisenä, niin käyttäjälle
+     * näytetään virheviesti, jos ei, niin käydään läpi posti luokan objectit ja asetetaan <code>lonLatList</code> listaan sijantitiedot.
+     *
+     * @param longitude - double, pituusaste
+     * @param latitude - double, leveysaste
+     * @param limit - int, raja
+     */
     private void getByXY(final double longitude, final double latitude, int limit){
         Call<List<Posti>> call = jsonApi.getPostisByXY(longitude, latitude, limit);
-
         call.enqueue(new Callback<List<Posti>>() {
             @Override
             public void onResponse(Call<List<Posti>> call, Response<List<Posti>> response) {
@@ -282,12 +351,18 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<List<Posti>> call, Throwable t) {
                 System.out.println("Error happened: " + t.getMessage());
                 txtResOne.setText(t.getMessage());
-
             }
         });
     }
 
-
+    /**
+     * Haetaan smartpostit postinumeron perusteella, jonka jälkeen kutsutaan <code>getByXY</code> funktiota, jonka avulla näytetään kaikki postit.
+     * Posti REST API vaatii tämän, muuten oikeita tuloksia ei tule.
+     * Funktion sisällä oleva <code>onResponse</code> funktio hoitaa Retrofitin palauttaman kutsun käsittelyn, jos kutsu palautuu virheelisenä, niin käyttäjälle
+     * näytetään virheviesti, jos ei, niin käydään läpi posti luokan objectit ja asetetaan <code>lon, lat</code> muuttujat.
+     *
+     * @param query - String, postinumero
+     */
     private void getByZip(String query){
         Call<List<Posti>> call = jsonApi.getPostis(query);
 
@@ -323,7 +398,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    /**
+     * Tarkistetaan onko käyttäjän syöte postinumero-kenttään oikein Regular Expressionia apuna käyttäen.
+     * Toimii suomalaisille postinumeroille. Jos muu kuin oikea postinumero, niin näytetään Virhe.
+     *
+     * @param input - String, käyttäjän syöte/postinumero
+     * @return parsedZip - String, puhdistettu zip tai Error string
+     */
     public String CheckInput(String input) {
         String parsedZip;
         if(input.matches("(\\d){5}")){
@@ -335,6 +416,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Avataan kartta sijaintien perusteella. Muodostetaan kyseltävä URL StringBuilder kirjastoa apuna käyttäen.
+     * Jos <code>lonLatList</code> listassa on tietoja, niin avataan uusi <code>Intent</code> Google Mapsille.
+     * Jos ei, niin näytetään käyttäjälle virheviesti ja kehoitetaan hakemaan ensin posteja.
+     *
+     * @param longitude - double, pituusaste
+     * @param latitude - double, leveysaste
+     */
     public void openMapByXY(final double longitude, final double latitude) {
         try {
             StringBuilder sb = new StringBuilder();
