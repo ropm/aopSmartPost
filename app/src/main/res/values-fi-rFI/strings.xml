@@ -16,4 +16,7 @@
     <string name="locationNotFoundString">Sijaintia ei voitu paikantaa! Tarkista asetuksesi</string>
     <string name="locationPermissionOKString">Sijaintilupa hyväksytty!</string>
     <string name="locationPermissionNOString">Sijaintilupa ei hyväksytty!</string>
+    <string name="exitString">Poistu</string>
+    <string name="emptyString">Tyhjennä</string>
+    <string name="errorNoPostis">Etsi SmartPosteja ennen kuin avaat kartan</string>
 </resources>

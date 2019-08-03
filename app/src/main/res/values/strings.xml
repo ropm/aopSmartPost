@@ -15,4 +15,7 @@
     <string name="yesString">OK</string>
     <string name="noString">Cancel</string>
     <string name="locationNotFoundString">Could not find your location! Check your settings</string>
+    <string name="exitString">Exit</string>
+    <string name="emptyString">Empty</string>
+    <string name="errorNoPostis">Please search for SmartPosts before opening the map</string>
 </resources>
