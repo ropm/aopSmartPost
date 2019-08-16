@@ -48,6 +48,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 /**
+ * <strong>SmartPostApp, AoP-kurssin projektityö</strong>
+ * <p>
+ * Tarkemmat tiedot löytyvät ohjelman dokumentaatiosta, tämä JavaDoc käsittelee vain ohjelman toimintoja.
+ * Ohjelma käyttää Retrofit2, Google Maps ja Location kirjastoja, sillä ne helpottavat datan hakemisessa ja näyttämisessä.
+ * @see <a href="https://square.github.io/retrofit/">Retrofit2</a>
+ * @see <a href="https://developers.google.com/maps/documentation/urls/android-intents">Google Maps & Location</a>
+ * </p>
  * <code>MainActivity</code>, pääohjelma
  * <code>MainActivity</code> sisältää, kuten monet muutkin android sovellukset, ohjelman tärkeimmät luomisfunktiot sekä jaetut muuttujat,
  * kuten esimerkiksi eri käyttöliittymäkomponentit.
